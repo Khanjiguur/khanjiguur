@@ -9,18 +9,11 @@ import lombok.Data;
 public class ProductImages {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     private Long imgId;
 
-    private String imageUrl1;
+    private String imageUrl;
 
-    private String imageUrl2;
+    private Long productId;
 
-    private String imageUrl3;
 
-    private String imageUrl4;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private Product product;
 }
