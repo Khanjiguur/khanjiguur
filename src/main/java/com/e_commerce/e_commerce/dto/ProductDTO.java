@@ -18,5 +18,8 @@ public class ProductDTO {
     private String description;
     private Double rating;
     private String color;
+    private Boolean stock;
+    private String sku;
+    private String code;
     private List<String> imageUrls ;
 }

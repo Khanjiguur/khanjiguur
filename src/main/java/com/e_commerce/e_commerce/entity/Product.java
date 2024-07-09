@@ -19,6 +19,9 @@ public class Product {
     private Double rating;
     private String description;
     private String color;
+    private Boolean stock;
+    private String sku;
+    private String code;
 
 
 }

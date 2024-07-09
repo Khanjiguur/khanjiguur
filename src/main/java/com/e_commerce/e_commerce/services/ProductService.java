@@ -52,6 +52,9 @@ public class ProductService {
         product.setRating(productDTO.getRating());
         product.setDescription(productDTO.getDescription());
         product.setColor(productDTO.getColor());
+        product.setStock(productDTO.getStock());
+        product.setSku(productDTO.getSku());
+        product.setCode(productDTO.getCode());
         product = productRepository.save(product);
         Set<ProductImages> images = new HashSet<>();
         if (productDTO.getImageUrls() != null) {
