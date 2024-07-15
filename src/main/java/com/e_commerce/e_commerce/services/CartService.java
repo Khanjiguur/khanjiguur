@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,12 +49,18 @@ public class CartService {
         cartDetailRepository.save(cartDetail);
     }
 
+    public void deleteCartItem(Long productId){
+        cartDetailRepository.deleteById(productId);
+    }
+
+
 
     public void orderCart() {
         Cart cart = getActiveCart();
         cart.setOrdered(true);
         cartRepository.save(cart);
     }
+
     public CartDTO getActiveCartDTO() {
         Cart cart = getActiveCart();
         CartDTO cartDTO = new CartDTO();
@@ -73,5 +80,4 @@ public class CartService {
         cartDTO.setCartDetails(cartDetailDTOs);
         return cartDTO;
     }
-
 }
