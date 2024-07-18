@@ -2,17 +2,15 @@ package com.e_commerce.e_commerce.services;
 
 import com.e_commerce.e_commerce.dto.CartDTO;
 import com.e_commerce.e_commerce.dto.CartDetailDTO;
-import com.e_commerce.e_commerce.entity.Cart;
-import com.e_commerce.e_commerce.entity.CartDetail;
-import com.e_commerce.e_commerce.entity.Product;
-import com.e_commerce.e_commerce.repository.CartDetailRepository;
-import com.e_commerce.e_commerce.repository.CartRepository;
-import com.e_commerce.e_commerce.repository.ProductRepository;
+import com.e_commerce.e_commerce.dto.OrderDTO;
+import com.e_commerce.e_commerce.entity.*;
+import com.e_commerce.e_commerce.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +24,12 @@ public class CartService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private OrderDetailRepository orderDetailRepository;
 
     public Cart getActiveCart() {
         Cart cart = cartRepository.findByIsOrderedFalse();
@@ -41,7 +45,6 @@ public class CartService {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         Cart cart = getActiveCart();
-
         CartDetail cartDetail = new CartDetail();
         cartDetail.setProduct(product);
         cartDetail.setQuantity(quantity);
@@ -49,16 +52,41 @@ public class CartService {
         cartDetailRepository.save(cartDetail);
     }
 
-    public void deleteCartItem(Long productId){
-        cartDetailRepository.deleteById(productId);
+    public void deleteCartItem(Long productId) {
+        Cart cart = getActiveCart();
+        CartDetail cartDetail = cartDetailRepository.findByCartAndProductId(cart, productId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+        cartDetailRepository.delete(cartDetail);
     }
 
-
-
-    public void orderCart() {
+    @Transactional
+    public Order orderCart(OrderDTO orderDTO) {
         Cart cart = getActiveCart();
+        Order order = new Order();
+        order.setOrderDate(new Date());
+        order.setAddress(orderDTO.getAddress());
+        order.setCity(orderDTO.getCity());
+        order.setName(orderDTO.getName());
+        order.setEmail(orderDTO.getEmail());
+        order.setApartment(orderDTO.getApartment());
+        order.setLastname(orderDTO.getLastname());
+        order.setPostalCode(orderDTO.getPostalCode());
+        order.setCountry(orderDTO.getCountry());
+        order = orderRepository.save(order);
+
+        Order finalOrder = order;
+        List<OrderDetail> orderDetails = cart.getCartDetails().stream().map(cartDetail -> {
+            OrderDetail orderDetail = new OrderDetail();
+            orderDetail.setOrder(finalOrder);
+            orderDetail.setProduct(cartDetail.getProduct());
+            return orderDetail;
+        }).collect(Collectors.toList());
+
+        orderDetailRepository.saveAll(orderDetails);
+
         cart.setOrdered(true);
         cartRepository.save(cart);
+        return order;
     }
 
     public CartDTO getActiveCartDTO() {
